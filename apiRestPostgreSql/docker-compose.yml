@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: prueba_coink_postgres_container
+    environment:
+      POSTGRES_DB: pruebacoinkdb           # Nombre de la base de datos
+      POSTGRES_USER: admin              # Usuario de la base de datos
+      POSTGRES_PASSWORD: admin      # Contraseña del usuario
+    ports:
+      - "5432:5432"                      # Exponer el puerto 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persistencia de datos
+
+volumes:
+  postgres_data:

@@ -76,17 +76,32 @@ namespace apiRestPostgreSql.Controllers
         [HttpGet]
         public IActionResult EliminarMunicipio(int idMunicipio)
         {
-            Municipio oMunicipio = _DBContext.Municipios.Include(d => d.oDepartamento).Where(e => e.Id == idMunicipio).FirstOrDefault();
+            Municipio oMunicipio = _DBContext.Municipios
+                .Include(d => d.oDepartamento)
+                .Where(e => e.Id == idMunicipio)
+                .FirstOrDefault();
             return View(oMunicipio);
 
         }
         [HttpPost]
-        public IActionResult EliminarMunicipio(Municipio oMunicipio)
+        public async Task<IActionResult> EliminarMunicipio(Municipio oMunicipio)
         {
-
-            _DBContext.Municipios.Remove(oMunicipio);
-            _DBContext.SaveChanges();
-            return RedirectToAction("Index", "Municipio");
+            var municipio = await _DBContext.Municipios
+                .AsNoTracking()
+                .Include(p => p.Personas)
+                .FirstOrDefaultAsync(p => p.Id == oMunicipio.Id);
+            if (municipio.Personas.Any())
+            {
+                ViewData["ErrorMessage"] = "No se puede eliminar el Municipio porque tiene Personas asociadas.";
+                return View(oMunicipio);
+            }
+            else
+            {
+                _DBContext.Municipios.Remove(oMunicipio);
+                await _DBContext.SaveChangesAsync();
+                return RedirectToAction("Index", "Municipio");
+            }
+            
 
         }
     }

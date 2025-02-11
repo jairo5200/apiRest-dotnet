@@ -81,12 +81,24 @@ namespace apiRestPostgreSql.Controllers
 
         }
         [HttpPost]
-        public IActionResult EliminarDepartamento(Departamento oDepartamento)
+        public async Task<IActionResult> EliminarDepartamento(Departamento oDepartamento)
         {
-
-            _DBContext.Departamentos.Remove(oDepartamento);
-            _DBContext.SaveChanges();
-            return RedirectToAction("Index", "Departamento");
+            var departamento = await _DBContext.Departamentos
+                .AsNoTracking()
+                .Include(p => p.Municipios)
+                .FirstOrDefaultAsync(p => p.Id == oDepartamento.Id);
+            if (departamento.Municipios.Any())
+            {
+                ViewData["ErrorMessage"] = "No se puede eliminar el Departamento porque tiene Municipios asociados.";
+                return View(oDepartamento);
+            }
+            else
+            {
+                _DBContext.Departamentos.Remove(oDepartamento);
+                _DBContext.SaveChangesAsync();
+                return RedirectToAction("Index", "Departamento");
+            }
+            
 
         }
     }

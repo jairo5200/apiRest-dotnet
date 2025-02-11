@@ -24,4 +24,10 @@
 
     </div>
 </div>
+@if (ViewData.ContainsKey("ErrorMessage"))
+{
+    <div class="alert alert-danger">
+        @ViewData["ErrorMessage"]
+    </div>
+}
 </div>

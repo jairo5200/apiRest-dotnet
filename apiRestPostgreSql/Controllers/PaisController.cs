@@ -66,11 +66,25 @@ namespace apiRestPostgreSql.Controllers
 
         }
         [HttpPost]
-        public IActionResult EliminarPais(Paise oPais)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EliminarPais(Paise oPais)
         {
-            _DBContext.Paises.Remove(oPais);
-            _DBContext.SaveChanges();
-            return RedirectToAction("Index", "Pais");
+            var pais = await _DBContext.Paises
+                .AsNoTracking()
+                .Include(p => p.Departamentos)
+                .FirstOrDefaultAsync(p => p.Id == oPais.Id);
+            if (pais.Departamentos.Any())
+            {
+                ViewData["ErrorMessage"] = "No se puede eliminar el país porque tiene departamentos asociados.";
+                return View(oPais);
+            }
+            else
+            {
+                _DBContext.Paises.Remove(oPais);
+                _DBContext.SaveChangesAsync();
+                return RedirectToAction("Index", "Pais");
+            }
+            
 
         }
     }

@@ -28,12 +28,60 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 8.0
 build_property.EnableCodeStyleSeverity = 
 
+[C:/Users/Zhifter/source/repos/apiRestPostgreSql/apiRestPostgreSql/Views/Departamento/DepartamentoDetalle.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVwYXJ0YW1lbnRvXERlcGFydGFtZW50b0RldGFsbGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Zhifter/source/repos/apiRestPostgreSql/apiRestPostgreSql/Views/Departamento/EliminarDepartamento.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVwYXJ0YW1lbnRvXEVsaW1pbmFyRGVwYXJ0YW1lbnRvLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Zhifter/source/repos/apiRestPostgreSql/apiRestPostgreSql/Views/Departamento/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVwYXJ0YW1lbnRvXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Zhifter/source/repos/apiRestPostgreSql/apiRestPostgreSql/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Zhifter/source/repos/apiRestPostgreSql/apiRestPostgreSql/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Zhifter/source/repos/apiRestPostgreSql/apiRestPostgreSql/Views/Municipio/EliminarMunicipio.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTXVuaWNpcGlvXEVsaW1pbmFyTXVuaWNpcGlvLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Zhifter/source/repos/apiRestPostgreSql/apiRestPostgreSql/Views/Municipio/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTXVuaWNpcGlvXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Zhifter/source/repos/apiRestPostgreSql/apiRestPostgreSql/Views/Municipio/MunicipioDetalle.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTXVuaWNpcGlvXE11bmljaXBpb0RldGFsbGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Zhifter/source/repos/apiRestPostgreSql/apiRestPostgreSql/Views/Pais/EliminarPais.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFpc1xFbGltaW5hclBhaXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Zhifter/source/repos/apiRestPostgreSql/apiRestPostgreSql/Views/Pais/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFpc1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Zhifter/source/repos/apiRestPostgreSql/apiRestPostgreSql/Views/Pais/PaisDetalle.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFpc1xQYWlzRGV0YWxsZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Zhifter/source/repos/apiRestPostgreSql/apiRestPostgreSql/Views/Persona/EliminarPersona.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGVyc29uYVxFbGltaW5hclBlcnNvbmEuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Zhifter/source/repos/apiRestPostgreSql/apiRestPostgreSql/Views/Persona/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGVyc29uYVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Zhifter/source/repos/apiRestPostgreSql/apiRestPostgreSql/Views/Persona/PersonaDetalle.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGVyc29uYVxQZXJzb25hRGV0YWxsZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Zhifter/source/repos/apiRestPostgreSql/apiRestPostgreSql/Views/Shared/Error.cshtml]

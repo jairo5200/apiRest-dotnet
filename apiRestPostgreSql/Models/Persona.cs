@@ -15,5 +15,5 @@ public partial class Persona
 
     public int? IdMunicipio { get; set; }
 
-    public virtual Municipio? IdMunicipioNavigation { get; set; }
+    public virtual Municipio? oMunicipio { get; set; }
 }

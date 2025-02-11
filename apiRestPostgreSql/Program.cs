@@ -1,7 +1,15 @@
+using Npgsql.EntityFrameworkCore;
+using apiRestPostgreSql.Models;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<PruebacoinkdbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("sqlConecction"))
+);
 
 var app = builder.Build();
 

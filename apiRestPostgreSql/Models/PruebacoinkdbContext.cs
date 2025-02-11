@@ -24,8 +24,9 @@ public partial class PruebacoinkdbContext : DbContext
     public virtual DbSet<Persona> Personas { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Server=localhost;Port=5432;User Id=admin;Password=admin;Database=pruebacoinkdb;");
+    {
+
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -41,7 +42,7 @@ public partial class PruebacoinkdbContext : DbContext
                 .HasMaxLength(100)
                 .HasColumnName("nombre");
 
-            entity.HasOne(d => d.IdPaisNavigation).WithMany(p => p.Departamentos)
+            entity.HasOne(d => d.oPais).WithMany(p => p.Departamentos)
                 .HasForeignKey(d => d.IdPais)
                 .HasConstraintName("departamentos_id_pais_fkey");
         });
@@ -58,7 +59,7 @@ public partial class PruebacoinkdbContext : DbContext
                 .HasMaxLength(100)
                 .HasColumnName("nombre");
 
-            entity.HasOne(d => d.IdDepartamentoNavigation).WithMany(p => p.Municipios)
+            entity.HasOne(d => d.oDepartamento).WithMany(p => p.Municipios)
                 .HasForeignKey(d => d.IdDepartamento)
                 .HasConstraintName("municipios_id_departamento_fkey");
         });
@@ -91,7 +92,7 @@ public partial class PruebacoinkdbContext : DbContext
                 .HasColumnName("nombre");
             entity.Property(e => e.Telefono).HasColumnName("telefono");
 
-            entity.HasOne(d => d.IdMunicipioNavigation).WithMany(p => p.Personas)
+            entity.HasOne(d => d.oMunicipio).WithMany(p => p.Personas)
                 .HasForeignKey(d => d.IdMunicipio)
                 .HasConstraintName("personas_id_municipio_fkey");
         });

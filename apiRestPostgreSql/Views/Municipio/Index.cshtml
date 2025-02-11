@@ -1,0 +1,56 @@
+﻿@model List<apiRestPostgreSql.Models.Municipio>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<x-app-layout>
+
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            Municipios
+        </h2>
+    </x-slot>
+
+
+
+    <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
+
+        <div class="flex items-center justify-start mt-4">
+            <a class="btn btn-warning text-white fs-5 border border-5 border-light" asp-action="MunicipioDetalle" asp-controller="Municipio" asp-route-idMunicipio="0">Crear Municipio</a>
+        </div>
+
+
+        <div class="mt-10">
+            <table id="paises" class="table-auto w-full table table-striped table-bordered shadow-lg mt-4">
+                <thead>
+                    <tr class="container ">
+                        <th class="px-4 py-2 text-gray-900 dark:text-black text-center">Municipio</th>
+                        <th class="px-4 py-2 text-gray-900 dark:text-black text-center">Departamento</th>
+                        <th class="px-4 py-2 text-gray-900 dark:text-black text-center">Opciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="border px-4 py-2 text-gray-900 dark:text-black text-center">@item.Nombre</td>
+                            <td class="border px-4 py-2 text-gray-900 dark:text-black text-center">@item.oDepartamento.Nombre</td>
+                            <td class="border px-4 py-2 text-center">
+                                <a class="btn btn-primary border-2 border-white py-2.5 px-6 rounded mr-2 fs-5" asp-action="MunicipioDetalle" asp-controller="Municipio" asp-route-idMunicipio="@item.Id">Editar</a>
+                                <a class="btn btn-danger border-2 border-white fs-5 py-2.5 px-6 rounded mr-2" asp-action="EliminarMunicipio" asp-controller="Municipio" asp-route-idMunicipio="@item.Id">Eliminar</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+
+
+</x-app-layout>
+

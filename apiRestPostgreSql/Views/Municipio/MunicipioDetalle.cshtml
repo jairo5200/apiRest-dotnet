@@ -1,0 +1,48 @@
+﻿@model apiRestPostgreSql.Models.ViewModels.MunicipioVM
+@{
+    ViewData["Title"] = "MunicipioDetalle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="text-center align-items-center">
+    @if (Model.oMunicipio.Id == 0)
+    {
+        <h1 class="fw-bold">Crear Municipio</h1>
+    }
+    else
+    {
+        <h1 class="fw-bold">Editar Municipio</h1>
+    }
+
+
+
+    <div class="mx-auto sm:px-6 lg:px-8 mt-5">
+        <div class="bg-black bg-opacity-50 border border-2 border-white rounded rounded-6  shadow-xl">
+            <form asp-action="MunicipioDetalle" asp-controller="Municipio" method="post">
+                <div class="mb-5 mt-2 ms-5 me-5">
+                    <input type="hidden" asp-for="oMunicipio.Id" />
+                    <label asp-for="oMunicipio.Nombre" class="block mb-2 fw-bold fs-3 text-white form-label">Nombre</label>
+                    <input type="text" asp-for="oMunicipio.Nombre" class="form-control mx-auto" placeholder="Medellín" required>
+                    <label asp-for="oMunicipio.IdDepartamento" class="block mb-2 fw-bold fs-3 text-white form-label">Deparatamento</label>
+                    <select class="form-select form-select-sm" asp-for="oMunicipio.IdDepartamento" asp-items="@Model.oListaDepartamento">
+                        <option selected disabled>-- seleccionar --</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    @if (Model.oMunicipio.Id == 0)
+                    {
+                        <button class="btn btn-success fs-3" type="submit">Crear Municipio</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-success fs-3" type="submit">Guardar Municipio</button>
+                    }
+
+                    <a class="btn btn-danger fs-3" asp-action="Index" asp-controller="Municipio">Cancelar</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

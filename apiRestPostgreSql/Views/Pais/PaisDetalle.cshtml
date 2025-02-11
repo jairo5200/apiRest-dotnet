@@ -23,6 +23,7 @@
                     <input type="hidden" asp-for="oPais.Id" />
                     <label asp-for="oPais.Nombre" class="block mb-2 fw-bold fs-3 text-white form-label">Nombre</label>
                     <input type="text" asp-for="oPais.Nombre" class="form-control mx-auto" placeholder="Colombia" required>
+                    <span asp-validation-for="oPais.Nombre" class="text-danger fs-4"></span>
                 </div>
                 <div class="mb-2">
                     @if(Model.oPais.Id == 0){

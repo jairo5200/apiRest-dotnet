@@ -45,18 +45,32 @@ namespace apiRestPostgreSql.Controllers
         [HttpPost]
         public IActionResult MunicipioDetalle(MunicipioVM oMunicipioVM)
         {
-            if (oMunicipioVM.oMunicipio.Id == 0)
+            ModelState.Remove("oListaDepartamento");
+            if (!ModelState.IsValid)
             {
-                _DBContext.Municipios.Add(oMunicipioVM.oMunicipio);
+                // Si el modelo no es válido, vuelve a mostrar la vista con los errores
+                oMunicipioVM.oListaDepartamento = _DBContext.Departamentos.Select(departamento => new SelectListItem
+                {
+                    Text = departamento.Nombre,
+                    Value = departamento.Id.ToString()
+                }).ToList();
+                return View(oMunicipioVM);
             }
             else
             {
-                _DBContext.Municipios.Update(oMunicipioVM.oMunicipio);
+                if (oMunicipioVM.oMunicipio.Id == 0)
+                {
+                    _DBContext.Municipios.Add(oMunicipioVM.oMunicipio);
+                }
+                else
+                {
+                    _DBContext.Municipios.Update(oMunicipioVM.oMunicipio);
+                }
+
+                _DBContext.SaveChanges();
+
+                return RedirectToAction("Index", "Municipio");
             }
-
-            _DBContext.SaveChanges();
-
-            return RedirectToAction("Index", "Municipio");
         }
 
         [HttpGet]

@@ -44,16 +44,33 @@ namespace apiRestPostgreSql.Controllers
         [HttpPost]
         public IActionResult DepartamentoDetalle(DepartamentoVM oDepartamentoVM)
         {
-            if (oDepartamentoVM.oDepartamento.Id == 0){
-                _DBContext.Departamentos.Add(oDepartamentoVM.oDepartamento);
+            ModelState.Remove("oListaPais");
+            if (!ModelState.IsValid)
+            {
+                // Si el modelo no es válido, vuelve a mostrar la vista con los errores
+                oDepartamentoVM.oListaPais = _DBContext.Paises.Select(pais => new SelectListItem
+                {
+                    Text = pais.Nombre,
+                    Value = pais.Id.ToString()
+                }).ToList();
+                return View(oDepartamentoVM);
             }
-            else{
-                _DBContext.Departamentos.Update(oDepartamentoVM.oDepartamento);
+            else
+            {
+                if (oDepartamentoVM.oDepartamento.Id == 0)
+                {
+                    _DBContext.Departamentos.Add(oDepartamentoVM.oDepartamento);
+                }
+                else
+                {
+                    _DBContext.Departamentos.Update(oDepartamentoVM.oDepartamento);
+                }
+
+                _DBContext.SaveChanges();
+
+                return RedirectToAction("Index", "Departamento");
             }
-
-            _DBContext.SaveChanges();
-
-            return RedirectToAction("Index","Departamento");
+            
         }
 
         [HttpGet]

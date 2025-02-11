@@ -24,10 +24,12 @@
                     <input type="hidden" asp-for="oMunicipio.Id" />
                     <label asp-for="oMunicipio.Nombre" class="block mb-2 fw-bold fs-3 text-white form-label">Nombre</label>
                     <input type="text" asp-for="oMunicipio.Nombre" class="form-control mx-auto" placeholder="Medellín" required>
+                    <span asp-validation-for="oMunicipio.Nombre" class="text-danger fs-4"></span>
                     <label asp-for="oMunicipio.IdDepartamento" class="block mb-2 fw-bold fs-3 text-white form-label">Deparatamento</label>
                     <select class="form-select form-select-sm" asp-for="oMunicipio.IdDepartamento" asp-items="@Model.oListaDepartamento">
                         <option selected disabled>-- seleccionar --</option>
                     </select>
+                    <span asp-validation-for="oMunicipio.IdDepartamento" class="text-danger fs-4"></span>
                 </div>
                 <div class="mb-2">
                     @if (Model.oMunicipio.Id == 0)

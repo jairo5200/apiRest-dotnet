@@ -4,6 +4,7 @@ using apiRestPostgreSql.Models;
 using apiRestPostgreSql.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace apiRestPostgreSql.Controllers
 {
@@ -39,6 +40,10 @@ namespace apiRestPostgreSql.Controllers
         [HttpPost]
         public IActionResult PaisDetalle(PaisVM oPaisVM)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(oPaisVM);
+            }
             if (oPaisVM.oPais.Id == 0)
             {
                 _DBContext.Paises.Add(oPaisVM.oPais);

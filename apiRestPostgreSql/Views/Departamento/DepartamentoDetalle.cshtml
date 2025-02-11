@@ -24,10 +24,12 @@
                     <input type="hidden" asp-for="oDepartamento.Id" />
                     <label asp-for="oDepartamento.Nombre" class="block mb-2 fw-bold fs-3 text-white form-label">Nombre</label>
                     <input type="text" asp-for="oDepartamento.Nombre" class="form-control mx-auto" placeholder="Antioquia" required>
+                    <span asp-validation-for="oDepartamento.Nombre" class="text-danger fs-4"></span>
                     <label asp-for="oDepartamento.IdPais" class="block mb-2 fw-bold fs-3 text-white form-label">País</label>
                     <select class="form-select form-select-sm" asp-for="oDepartamento.IdPais" asp-items="@Model.oListaPais">
                         <option selected disabled>-- seleccionar --</option>
                     </select>
+                    <span asp-validation-for="oDepartamento.IdPais" class="text-danger fs-4"></span>
                 </div>
                 <div class="mb-2">
                     @if (Model.oDepartamento.Id == 0)

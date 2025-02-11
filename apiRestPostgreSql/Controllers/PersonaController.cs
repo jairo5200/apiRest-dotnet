@@ -3,6 +3,7 @@ using apiRestPostgreSql.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace apiRestPostgreSql.Controllers
 {
@@ -37,24 +38,40 @@ namespace apiRestPostgreSql.Controllers
             {
                 oPersonaVM.oPersona = _DBContext.Personas.Find(idPersona);
             }
+
             return View(oPersonaVM);
         }
 
         [HttpPost]
         public IActionResult PersonaDetalle(PersonaVM oPersonaVM)
         {
-            if (oPersonaVM.oPersona.Id == 0)
+            ModelState.Remove("oListaMunicipios");
+            if (!ModelState.IsValid)
             {
-                _DBContext.Personas.Add(oPersonaVM.oPersona);
+                // Si el modelo no es válido, vuelve a mostrar la vista con los errores
+                oPersonaVM.oListaMunicipios = _DBContext.Municipios.Select(municipio => new SelectListItem
+                {
+                    Text = municipio.Nombre,
+                    Value = municipio.Id.ToString()
+                }).ToList();
+                return View(oPersonaVM);
             }
             else
             {
-                _DBContext.Personas.Update(oPersonaVM.oPersona);
+                if (oPersonaVM.oPersona.Id == 0)
+                {
+                    _DBContext.Personas.Add(oPersonaVM.oPersona);
+                }
+                else
+                {
+                    _DBContext.Personas.Update(oPersonaVM.oPersona);
+                }
+
+                _DBContext.SaveChanges();
+
+                return RedirectToAction("Index", "Persona");
             }
-
-            _DBContext.SaveChanges();
-
-            return RedirectToAction("Index", "Persona");
+            
         }
 
         [HttpGet]

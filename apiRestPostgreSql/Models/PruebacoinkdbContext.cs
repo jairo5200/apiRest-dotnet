@@ -97,6 +97,7 @@ public partial class PruebacoinkdbContext : DbContext
                 .HasConstraintName("personas_id_municipio_fkey");
         });
 
+
         OnModelCreatingPartial(modelBuilder);
     }
 

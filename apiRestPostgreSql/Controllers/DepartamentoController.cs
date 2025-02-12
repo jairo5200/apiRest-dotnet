@@ -5,6 +5,7 @@ using apiRestPostgreSql.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Npgsql;
 
 namespace apiRestPostgreSql.Controllers
 {
@@ -18,55 +19,98 @@ namespace apiRestPostgreSql.Controllers
 
         public IActionResult Index()
         {
-            List<Departamento> departamentos = _DBContext.Departamentos
-         .FromSqlRaw("SELECT * FROM obtener_departamentos()")
-         .ToList();
-
-            foreach (var departamento in departamentos)
+            try
             {
-                if (departamento.IdPais != null)
-                {
-                    departamento.oPais = _DBContext.Paises.Find(departamento.IdPais);
-                }
-            }
+                // Obtenemos la lista de departamentos
+                List<Departamento> departamentos = _DBContext.Departamentos
+                    .FromSqlRaw("SELECT * FROM obtener_departamentos()")
+                    .ToList();
 
-            return View(departamentos);
+                // Iteramos los departamentos
+                foreach (var departamento in departamentos)
+                {
+                    // Validamos que el departamento tenga un país
+                    if (departamento.IdPais != null)
+                    {
+                        // Asignamos el país al departamento
+                        departamento.oPais = _DBContext.Paises.Find(departamento.IdPais);
+                    }
+                }
+
+                return View(departamentos);
+            }
+            catch (PostgresException ex)
+            {
+                // Capturamos la excepción específica de PostgreSQL
+                string errorMessage = $"Error: {ex.MessageText} (Código: {ex.SqlState})";
+
+                // Muestra un mensaje amigable al usuario
+                ViewBag.ErrorMessage = errorMessage; // Asignamos el mensaje a una ViewBag
+                return View("Error"); // Redirigimos a la pagina Error para mostrar el Error
+            }
+            
         }
 
         [HttpGet]
         public IActionResult DepartamentoDetalle(int idDepartamento)
         {
-            DepartamentoVM oDepartamentoVM = new DepartamentoVM()
+            try
             {
-                oDepartamento = new Departamento(),
-                oListaPais = _DBContext.Paises.Select(pais => new SelectListItem()
+                // Generamos un departamento nuevo y el listado de países
+                DepartamentoVM oDepartamentoVM = new DepartamentoVM()
                 {
-                    Text = pais.Nombre,
-                    Value = pais.Id.ToString()
-                }).ToList()
-            };
+                    oDepartamento = new Departamento(),
+                    oListaPais = _DBContext.Paises.Select(pais => new SelectListItem()
+                    {
+                        Text = pais.Nombre,
+                        Value = pais.Id.ToString()
+                    }).ToList()
+                };
 
-            if (idDepartamento != 0)
-            {
-                // Llamar a la función almacenada para obtener el departamento
-                var departamento = _DBContext.Departamentos
-                    .FromSqlRaw("SELECT * FROM obtener_departamento_por_id({0})", idDepartamento)
-                    .AsEnumerable() // Convierte a IEnumerable para poder acceder a los resultados
-                    .FirstOrDefault();
-
-                if (departamento != null)
+                // Validamos que el departamento ya exista
+                if (idDepartamento != 0)
                 {
-                    oDepartamentoVM.oDepartamento = departamento;
+                    // Llamamos a la función almacenada para obtener el departamento
+                    var departamento = _DBContext.Departamentos
+                        .FromSqlRaw("SELECT * FROM obtener_departamento_por_id({0})", idDepartamento)
+                        .AsEnumerable() // Convierte a IEnumerable para poder acceder a los resultados
+                        .FirstOrDefault();
+                    // Validamos que el departamento no sea null
+                    if (departamento != null)
+                    {
+                        // Asignamos el departamento al ViewModel
+                        oDepartamentoVM.oDepartamento = departamento;
+                    }
                 }
-            }
 
-            return View(oDepartamentoVM);
+                return View(oDepartamentoVM);
+            }
+            catch (PostgresException ex)
+            {
+                // Capturamos la excepción específica de PostgreSQL
+                string errorMessage = $"Error: {ex.Message} (Código: {ex.SqlState})";
+
+                // Muestra un mensaje amigable al usuario
+                ViewBag.ErrorMessage = errorMessage; // Asignamos el mensaje a una ViewBag
+                return View("Error"); // Redirigimos a la pagina Error para mostrar el Error
+            }
+            catch (Exception ex)
+            {
+                // Captura cualquier otra excepción
+                string errorMessage = $"Error: {ex.Message}";
+
+                // Muestra un mensaje amigable al usuario
+                ViewBag.ErrorMessage = errorMessage; // Asignamos el mensaje a una ViewBag
+                return View("Error"); // Redirigimos a la pagina Error para mostrar el Error
+            }
         }
 
         [HttpPost]
         public IActionResult DepartamentoDetalle(DepartamentoVM oDepartamentoVM)
         {
+            // Removemos oListaPais del modelo
             ModelState.Remove("oListaPais");
+            // Validamos el modelo
             if (!ModelState.IsValid)
             {
                 // Si el modelo no es válido, vuelve a mostrar la vista con los errores
@@ -79,7 +123,7 @@ namespace apiRestPostgreSql.Controllers
             }
             else
             {
-                // Llamar al procedimiento almacenado para guardar el departamento
+                // Llamamos al procedimiento almacenado para guardar el departamento
                 _DBContext.Database.ExecuteSqlRaw("CALL guardar_departamento({0}, {1}, {2})",
                     oDepartamentoVM.oDepartamento.Id,
                     oDepartamentoVM.oDepartamento.Nombre,
@@ -93,6 +137,7 @@ namespace apiRestPostgreSql.Controllers
         [HttpGet]
         public IActionResult EliminarDepartamento(int idDepartamento)
         {
+            // Buscamos y cargamos la informacion del departamento a eliminar
             Departamento oDepartamento = _DBContext.Departamentos.Include(p => p.oPais).Where(e => e.Id == idDepartamento).FirstOrDefault();
             return View(oDepartamento);
 
@@ -102,14 +147,14 @@ namespace apiRestPostgreSql.Controllers
         {
             try
             {
-                // Llamar al procedimiento almacenado para eliminar el departamento
+                // Llamamos al procedimiento almacenado para eliminar el departamento
                 _DBContext.Database.ExecuteSqlRaw("CALL eliminar_departamento({0})", oDepartamento.Id);
 
                 return RedirectToAction("Index", "Departamento");
             }
             catch (Exception ex)
             {
-                // Manejar la excepción si el departamento tiene municipios asociados
+                // Manejamos la excepción si el departamento tiene municipios asociados
                 ViewData["ErrorMessage"] = ex.Message;
                 return View(oDepartamento);
             }

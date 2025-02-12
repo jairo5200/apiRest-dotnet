@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Npgsql;
 
 namespace apiRestPostgreSql.Controllers
 {
@@ -16,56 +17,98 @@ namespace apiRestPostgreSql.Controllers
 
         public IActionResult Index()
         {
-            List<Persona> personas = _DBContext.Personas
-                .FromSqlRaw("SELECT * FROM obtener_personas()")
-                .ToList();
-
-            foreach (var persona in personas)
+            try
             {
-                if (persona.IdMunicipio != null)
-                {
-                    persona.oMunicipio = _DBContext.Municipios.Find(persona.IdMunicipio);
-                }
-            }
+                // Obtenemos la lista de personas
+                List<Persona> personas = _DBContext.Personas
+                    .FromSqlRaw("SELECT * FROM obtener_personas()")
+                    .ToList();
 
-            return View(personas);
+                // Iteramos la lista de personas
+                foreach (var persona in personas)
+                {
+                    // Validamos que la persona tenga municipio
+                    if (persona.IdMunicipio != null)
+                    {
+                        // Asignamos el municipio a la persona
+                        persona.oMunicipio = _DBContext.Municipios.Find(persona.IdMunicipio);
+                    }
+                }
+
+                return View(personas);
+            }
+            catch (PostgresException ex)
+            {
+                // Capturamos la excepción específica de PostgreSQL
+                string errorMessage = $"Error: {ex.MessageText} (Código: {ex.SqlState})";
+
+                // Muestra un mensaje amigable al usuario
+                ViewBag.ErrorMessage = errorMessage; // Asignamos el mensaje a una ViewBag
+                return View("Error"); // Redirigimos a la pagina Error para mostrar el Error
+            }
         }
 
 
         [HttpGet]
         public IActionResult PersonaDetalle(int idPersona)
         {
-            PersonaVM oPersonaVM = new PersonaVM()
+            try
             {
-                oPersona = new Persona(),
-                oListaMunicipios = _DBContext.Municipios.Select(municipio => new SelectListItem()
+                // Generamos una persona nueva y el listado de municipios
+                PersonaVM oPersonaVM = new PersonaVM()
                 {
-                    Text = municipio.Nombre,
-                    Value = municipio.Id.ToString()
-                }).ToList()
-            };
+                    oPersona = new Persona(),
+                    oListaMunicipios = _DBContext.Municipios.Select(municipio => new SelectListItem()
+                    {
+                        Text = municipio.Nombre,
+                        Value = municipio.Id.ToString()
+                    }).ToList()
+                };
 
-            if (idPersona != 0)
-            {
-                // Llamar a la función almacenada para obtener la persona
-                var persona = _DBContext.Personas
-                    .FromSqlRaw("SELECT * FROM obtener_persona_detalle({0})", idPersona)
-                    .AsEnumerable() // Convierte a IEnumerable para poder acceder a los resultados
-                    .FirstOrDefault();
-
-                if (persona != null)
+                if (idPersona != 0)
                 {
-                    oPersonaVM.oPersona = persona;
+                    // Llamar a la función almacenada para obtener la persona
+                    var persona = _DBContext.Personas
+                        .FromSqlRaw("SELECT * FROM obtener_persona_detalle({0})", idPersona)
+                        .AsEnumerable() // Convierte a IEnumerable para poder acceder a los resultados
+                        .FirstOrDefault();
+                    // Validamos que la persona no sea null
+                    if (persona != null)
+                    {
+                        // Asignamos la persona al ViewModel
+                        oPersonaVM.oPersona = persona;
+                    }
                 }
+
+                return View(oPersonaVM);
+            }
+            catch (PostgresException ex)
+            {
+                // Capturamos la excepción específica de PostgreSQL
+                string errorMessage = $"Error: {ex.Message} (Código: {ex.SqlState})";
+
+                // Muestra un mensaje amigable al usuario
+                ViewBag.ErrorMessage = errorMessage; // Asignamos el mensaje a una ViewBag
+                return View("Error"); // Redirigimos a la pagina Error para mostrar el Error
+            }
+            catch (Exception ex)
+            {
+                // Captura cualquier otra excepción
+                string errorMessage = $"Error: {ex.Message}";
+
+                // Muestra un mensaje amigable al usuario
+                ViewBag.ErrorMessage = errorMessage; // Asignamos el mensaje a una ViewBag
+                return View("Error"); // Redirigimos a la pagina Error para mostrar el Error
             }
 
-            return View(oPersonaVM);
         }
 
         [HttpPost]
         public IActionResult PersonaDetalle(PersonaVM oPersonaVM)
         {
+            // Removemos oListaMunicipios del modelo 
             ModelState.Remove("oListaMunicipios");
+            // Validamos el modelo
             if (!ModelState.IsValid)
             {
                 // Si el modelo no es válido, vuelve a mostrar la vista con los errores
@@ -94,6 +137,7 @@ namespace apiRestPostgreSql.Controllers
         [HttpGet]
         public IActionResult EliminarPersona(int idPersona)
         {
+            // Buscamos y cargamos la informacion de la persona a eliminar
             Persona oPersona = _DBContext.Personas.Include(m => m.oMunicipio).Where(e => e.Id == idPersona).FirstOrDefault();
             return View(oPersona);
 
@@ -101,7 +145,7 @@ namespace apiRestPostgreSql.Controllers
         [HttpPost]
         public IActionResult EliminarPersona(Persona oPersona)
         {
-            // Llamar al procedimiento almacenado para eliminar la persona
+            // Llamamos al procedimiento almacenado para eliminar la persona
             _DBContext.Database.ExecuteSqlRaw("CALL eliminar_persona({0})", oPersona.Id);
 
             return RedirectToAction("Index", "Persona");

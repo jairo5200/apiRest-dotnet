@@ -18,7 +18,18 @@ namespace apiRestPostgreSql.Controllers
 
         public IActionResult Index()
         {
-            List<Departamento> departamentos = _DBContext.Departamentos.Include(e => e.oPais).ToList();
+            List<Departamento> departamentos = _DBContext.Departamentos
+         .FromSqlRaw("SELECT * FROM obtener_departamentos()")
+         .ToList();
+
+            foreach (var departamento in departamentos)
+            {
+                if (departamento.IdPais != null)
+                {
+                    departamento.oPais = _DBContext.Paises.Find(departamento.IdPais);
+                }
+            }
+
             return View(departamentos);
         }
 
@@ -28,7 +39,8 @@ namespace apiRestPostgreSql.Controllers
             DepartamentoVM oDepartamentoVM = new DepartamentoVM()
             {
                 oDepartamento = new Departamento(),
-                oListaPais = _DBContext.Paises.Select(pais => new SelectListItem(){
+                oListaPais = _DBContext.Paises.Select(pais => new SelectListItem()
+                {
                     Text = pais.Nombre,
                     Value = pais.Id.ToString()
                 }).ToList()
@@ -36,8 +48,18 @@ namespace apiRestPostgreSql.Controllers
 
             if (idDepartamento != 0)
             {
-               oDepartamentoVM.oDepartamento = _DBContext.Departamentos.Find(idDepartamento);
+                // Llamar a la función almacenada para obtener el departamento
+                var departamento = _DBContext.Departamentos
+                    .FromSqlRaw("SELECT * FROM obtener_departamento_por_id({0})", idDepartamento)
+                    .AsEnumerable() // Convierte a IEnumerable para poder acceder a los resultados
+                    .FirstOrDefault();
+
+                if (departamento != null)
+                {
+                    oDepartamentoVM.oDepartamento = departamento;
+                }
             }
+
             return View(oDepartamentoVM);
         }
 
@@ -57,20 +79,15 @@ namespace apiRestPostgreSql.Controllers
             }
             else
             {
-                if (oDepartamentoVM.oDepartamento.Id == 0)
-                {
-                    _DBContext.Departamentos.Add(oDepartamentoVM.oDepartamento);
-                }
-                else
-                {
-                    _DBContext.Departamentos.Update(oDepartamentoVM.oDepartamento);
-                }
-
-                _DBContext.SaveChanges();
+                // Llamar al procedimiento almacenado para guardar el departamento
+                _DBContext.Database.ExecuteSqlRaw("CALL guardar_departamento({0}, {1}, {2})",
+                    oDepartamentoVM.oDepartamento.Id,
+                    oDepartamentoVM.oDepartamento.Nombre,
+                    oDepartamentoVM.oDepartamento.IdPais);
 
                 return RedirectToAction("Index", "Departamento");
             }
-            
+
         }
 
         [HttpGet]
@@ -83,23 +100,19 @@ namespace apiRestPostgreSql.Controllers
         [HttpPost]
         public async Task<IActionResult> EliminarDepartamento(Departamento oDepartamento)
         {
-            var departamento = await _DBContext.Departamentos
-                .AsNoTracking()
-                .Include(p => p.Municipios)
-                .FirstOrDefaultAsync(p => p.Id == oDepartamento.Id);
-            if (departamento.Municipios.Any())
+            try
             {
-                ViewData["ErrorMessage"] = "No se puede eliminar el Departamento porque tiene Municipios asociados.";
-                return View(oDepartamento);
-            }
-            else
-            {
-                _DBContext.Departamentos.Remove(oDepartamento);
-                _DBContext.SaveChangesAsync();
+                // Llamar al procedimiento almacenado para eliminar el departamento
+                _DBContext.Database.ExecuteSqlRaw("CALL eliminar_departamento({0})", oDepartamento.Id);
+
                 return RedirectToAction("Index", "Departamento");
             }
-            
-
+            catch (Exception ex)
+            {
+                // Manejar la excepción si el departamento tiene municipios asociados
+                ViewData["ErrorMessage"] = ex.Message;
+                return View(oDepartamento);
+            }
         }
     }
 }

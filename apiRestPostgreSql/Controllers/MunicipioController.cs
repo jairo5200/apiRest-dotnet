@@ -4,6 +4,7 @@ using apiRestPostgreSql.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 
 namespace apiRestPostgreSql.Controllers
 {
@@ -17,7 +18,18 @@ namespace apiRestPostgreSql.Controllers
 
         public IActionResult Index()
         {
-            List<Municipio> municipios = _DBContext.Municipios.Include(e => e.oDepartamento).ToList();
+            List<Municipio> municipios = _DBContext.Municipios
+                .FromSqlRaw("SELECT * FROM obtener_municipios()")
+                .ToList();
+
+            foreach (var municipio in municipios)
+            {
+                if (municipio.IdDepartamento != null)
+                {
+                    municipio.oDepartamento = _DBContext.Departamentos.Find(municipio.IdDepartamento);
+                }
+            }
+
             return View(municipios);
         }
 
@@ -37,8 +49,18 @@ namespace apiRestPostgreSql.Controllers
 
             if (idMunicipio != 0)
             {
-                oMunicipioVM.oMunicipio = _DBContext.Municipios.Find(idMunicipio);
+                // Llamar a la función almacenada para obtener el municipio
+                var municipio = _DBContext.Municipios
+                    .FromSqlRaw("SELECT * FROM obtener_municipio_detalle({0})", idMunicipio)
+                    .AsEnumerable() // Convierte a IEnumerable para poder acceder a los resultados
+                    .FirstOrDefault();
+
+                if (municipio != null)
+                {
+                    oMunicipioVM.oMunicipio = municipio;
+                }
             }
+
             return View(oMunicipioVM);
         }
 
@@ -48,7 +70,6 @@ namespace apiRestPostgreSql.Controllers
             ModelState.Remove("oListaDepartamento");
             if (!ModelState.IsValid)
             {
-                // Si el modelo no es válido, vuelve a mostrar la vista con los errores
                 oMunicipioVM.oListaDepartamento = _DBContext.Departamentos.Select(departamento => new SelectListItem
                 {
                     Text = departamento.Nombre,
@@ -58,16 +79,11 @@ namespace apiRestPostgreSql.Controllers
             }
             else
             {
-                if (oMunicipioVM.oMunicipio.Id == 0)
-                {
-                    _DBContext.Municipios.Add(oMunicipioVM.oMunicipio);
-                }
-                else
-                {
-                    _DBContext.Municipios.Update(oMunicipioVM.oMunicipio);
-                }
-
-                _DBContext.SaveChanges();
+                // Llamar al procedimiento almacenado para guardar o actualizar el municipio
+                _DBContext.Database.ExecuteSqlRaw("CALL guardar_municipio({0}, {1}, {2})",
+                    oMunicipioVM.oMunicipio.Id,
+                    oMunicipioVM.oMunicipio.Nombre,
+                    oMunicipioVM.oMunicipio.IdDepartamento);
 
                 return RedirectToAction("Index", "Municipio");
             }
@@ -86,23 +102,19 @@ namespace apiRestPostgreSql.Controllers
         [HttpPost]
         public async Task<IActionResult> EliminarMunicipio(Municipio oMunicipio)
         {
-            var municipio = await _DBContext.Municipios
-                .AsNoTracking()
-                .Include(p => p.Personas)
-                .FirstOrDefaultAsync(p => p.Id == oMunicipio.Id);
-            if (municipio.Personas.Any())
+            try
             {
-                ViewData["ErrorMessage"] = "No se puede eliminar el Municipio porque tiene Personas asociadas.";
-                return View(oMunicipio);
-            }
-            else
-            {
-                _DBContext.Municipios.Remove(oMunicipio);
-                await _DBContext.SaveChangesAsync();
+                // Llamar al procedimiento almacenado para eliminar el municipio
+                _DBContext.Database.ExecuteSqlRaw("CALL eliminar_municipio({0})",oMunicipio.Id);
+
                 return RedirectToAction("Index", "Municipio");
             }
-            
-
+            catch (DbException ex)
+            {
+                // Manejar la excepción en caso de que el municipio tenga personas asociadas
+                ViewData["ErrorMessage"] = ex.Message;
+                return View(oMunicipio);
+            }
         }
     }
 }

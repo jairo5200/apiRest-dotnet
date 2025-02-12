@@ -5,6 +5,7 @@ using apiRestPostgreSql.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Data.Common;
 
 namespace apiRestPostgreSql.Controllers
 {
@@ -18,7 +19,16 @@ namespace apiRestPostgreSql.Controllers
 
         public IActionResult Index()
         {
-            List<Paise> paises = _DBContext.Paises.ToList();
+            // Creamos una lista para almacenar los países
+            List<Paise> paises = new List<Paise>();
+
+            // Llamamos al proceso almacenado
+            var result = _DBContext.Paises.FromSqlRaw("SELECT * FROM obtener_paises()").ToList();
+
+            // Asignar el resultado a la lista
+            paises = result;
+
+            //retornamos la vista con la lista de paises
             return View(paises);
         }
 
@@ -31,7 +41,10 @@ namespace apiRestPostgreSql.Controllers
             };
             if (idPais != 0)
             {
-                oPaisVM.oPais = _DBContext.Paises.Find(idPais);
+                // Llamar al stored procedure
+                oPaisVM.oPais = _DBContext.Paises
+                    .FromSqlRaw("SELECT * FROM obtener_pais_por_id({0})", idPais)
+                    .FirstOrDefault();
             }
             return View(oPaisVM);
 
@@ -44,24 +57,16 @@ namespace apiRestPostgreSql.Controllers
             {
                 return View(oPaisVM);
             }
-            if (oPaisVM.oPais.Id == 0)
-            {
-                _DBContext.Paises.Add(oPaisVM.oPais);
-            }
-            else
-            {
-                _DBContext.Paises.Update(oPaisVM.oPais);
-            }
-
-            _DBContext.SaveChanges();
-
+            _DBContext.Database.ExecuteSqlRaw("CALL guardar_pais({0}, {1})", oPaisVM.oPais.Id, oPaisVM.oPais.Nombre);
             return RedirectToAction("Index", "Pais");
         }
 
         [HttpGet]
         public IActionResult EliminarPais(int idPais)
         {
-            Paise oPais = _DBContext.Paises.Where(e => e.Id == idPais).FirstOrDefault();
+            Paise oPais = _DBContext.Paises
+                    .FromSqlRaw("SELECT * FROM obtener_pais_por_id({0})", idPais)
+                    .FirstOrDefault();
             return View(oPais);
 
         }
@@ -69,22 +74,21 @@ namespace apiRestPostgreSql.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EliminarPais(Paise oPais)
         {
-            var pais = await _DBContext.Paises
-                .AsNoTracking()
-                .Include(p => p.Departamentos)
-                .FirstOrDefaultAsync(p => p.Id == oPais.Id);
-            if (pais.Departamentos.Any())
+            try
             {
-                ViewData["ErrorMessage"] = "No se puede eliminar el país porque tiene departamentos asociados.";
-                return View(oPais);
-            }
-            else
-            {
-                _DBContext.Paises.Remove(oPais);
-                _DBContext.SaveChangesAsync();
+                // Llama al procedimiento almacenado
+                _DBContext.Database.ExecuteSqlRaw("CALL eliminar_pais({0})", oPais.Id);
+
+                // Redirecciona a la vista de la lista de países
                 return RedirectToAction("Index", "Pais");
             }
-            
+            catch (DbException ex)
+            {
+                // Maneja la excepción si el país tiene departamentos asociados
+                ViewData["ErrorMessage"] = ex.Message;
+                return View(oPais);
+            }
+
 
         }
     }

@@ -46,9 +46,8 @@ namespace apiRestPostgreSql.Controllers
 
                 // Muestra un mensaje amigable al usuario
                 ViewBag.ErrorMessage = errorMessage; // Asignamos el mensaje a una ViewBag
-                return View("Error"); // Redirigimos a la pagina Error para mostrar el Error
+                return View("Error"); // Redirigimos a la página Error para mostrar el Error
             }
-            
         }
 
         [HttpGet]
@@ -92,7 +91,7 @@ namespace apiRestPostgreSql.Controllers
 
                 // Muestra un mensaje amigable al usuario
                 ViewBag.ErrorMessage = errorMessage; // Asignamos el mensaje a una ViewBag
-                return View("Error"); // Redirigimos a la pagina Error para mostrar el Error
+                return View("Error"); // Redirigimos a la página Error para mostrar el Error
             }
             catch (Exception ex)
             {
@@ -101,7 +100,7 @@ namespace apiRestPostgreSql.Controllers
 
                 // Muestra un mensaje amigable al usuario
                 ViewBag.ErrorMessage = errorMessage; // Asignamos el mensaje a una ViewBag
-                return View("Error"); // Redirigimos a la pagina Error para mostrar el Error
+                return View("Error"); // Redirigimos a la página Error para mostrar el Error
             }
         }
 
